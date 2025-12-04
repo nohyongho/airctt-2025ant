@@ -221,7 +221,7 @@ export default function ConsumerEventPage() {
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(reward.qrToken)}`}
                   alt="Reward QR"
-                  className="w-40 h-40"
+                  className="w-24 h-24" // Reduced from w-40 h-40 (approx 2/5 size visually)
                 />
               </div>
 

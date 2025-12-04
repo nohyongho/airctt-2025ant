@@ -165,18 +165,18 @@ export default function EventGameWindow({ onCouponAcquired }: EventGameWindowPro
             {/* Header / Controls */}
             <div className="absolute top-4 left-4 z-10 flex items-center gap-4 pointer-events-none">
                 <div>
-                    <h3 className="text-white font-bold text-lg drop-shadow-md flex items-center gap-2">
+                    <h3 className="text-white font-bold text-base sm:text-lg drop-shadow-md flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                         AR Event Zone
                     </h3>
-                    <p className="text-white/60 text-xs">쿠폰을 터치하여 획득하세요!</p>
+                    <p className="text-white/60 text-[10px] sm:text-xs">쿠폰을 터치하여 획득하세요!</p>
                 </div>
 
                 {/* Google Sheets Sync Indicator */}
                 {isSyncing && (
-                    <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full backdrop-blur-md">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-ping" />
-                        <span className="text-[10px] text-green-200 font-mono">Google Sheets 저장 중...</span>
+                    <div className="flex items-center gap-2 px-2 py-0.5 sm:px-3 sm:py-1 bg-green-500/20 border border-green-500/30 rounded-full backdrop-blur-md">
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-ping" />
+                        <span className="text-[8px] sm:text-[10px] text-green-200 font-mono">Saving...</span>
                     </div>
                 )}
             </div>
@@ -185,27 +185,27 @@ export default function EventGameWindow({ onCouponAcquired }: EventGameWindowPro
             <div className="absolute top-4 right-4 z-10 flex gap-2">
                 <button
                     onClick={toggleMaximize}
-                    className="p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-md transition-colors border border-white/10 z-50 cursor-pointer"
+                    className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-md transition-colors border border-white/10 z-50 cursor-pointer"
                 >
                     {isMaximized ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><path d="M9 3v18" /><path d="m15 9 3 3-3 3" /><path d="M9 12h9" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><path d="M9 3v18" /><path d="m15 9 3 3-3 3" /><path d="M9 12h9" /></svg>
                     )}
                 </button>
             </div>
 
             {/* Scoreboard */}
             <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
-                <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-3 flex gap-4">
-                    <div className="text-center">
-                        <div className="text-[10px] text-white/60 uppercase tracking-wider">Score</div>
-                        <div className="text-xl font-bold text-white font-mono">{score.toLocaleString()}</div>
+                <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-2 sm:p-3 flex gap-3 sm:gap-4">
+                    <div className="text-center min-w-[50px]">
+                        <div className="text-[8px] sm:text-[10px] text-white/60 uppercase tracking-wider">Score</div>
+                        <div className="text-base sm:text-xl font-bold text-white font-mono">{score.toLocaleString()}</div>
                     </div>
                     <div className="w-px bg-white/10" />
-                    <div className="text-center">
-                        <div className="text-[10px] text-white/60 uppercase tracking-wider">Coupons</div>
-                        <div className="text-xl font-bold text-yellow-400 font-mono">{acquiredCount}</div>
+                    <div className="text-center min-w-[50px]">
+                        <div className="text-[8px] sm:text-[10px] text-white/60 uppercase tracking-wider">Coupons</div>
+                        <div className="text-base sm:text-xl font-bold text-yellow-400 font-mono">{acquiredCount}</div>
                     </div>
                 </div>
             </div>
