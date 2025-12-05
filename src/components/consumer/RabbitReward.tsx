@@ -42,16 +42,32 @@ export default function RabbitReward({ onComplete, rewardName, lang }: RabbitRew
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="mb-4 bg-white px-6 py-3 rounded-2xl rounded-bl-none shadow-xl border-2 border-[#FFD600]"
+                    className="mb-4 bg-black/30 backdrop-blur-md px-6 py-4 rounded-2xl rounded-bl-none shadow-2xl border border-white/20"
                 >
-                    <p className="text-lg font-bold text-black flex items-center gap-2">
+                    <p className="text-lg font-bold text-white flex items-center gap-2 drop-shadow-md">
                         <span className="text-2xl">🎉</span>
                         {t.congrats}
                     </p>
-                    <div className="mt-1">
-                        <span className="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#FFD600] via-[#00C853] to-[#2962FF] animate-pulse drop-shadow-sm" style={{ textShadow: '2px 2px 0px rgba(0,0,0,0.1)' }}>
+                    <div className="mt-2">
+                        <motion.span
+                            className="text-3xl font-black tracking-wider drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                            animate={{
+                                color: ["#00C853", "#FFD600", "#2962FF", "#00C853"],
+                                textShadow: [
+                                    "0 0 10px rgba(0,200,83,0.8)",
+                                    "0 0 10px rgba(255,214,0,0.8)",
+                                    "0 0 10px rgba(41,98,255,0.8)",
+                                    "0 0 10px rgba(0,200,83,0.8)"
+                                ]
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "linear"
+                            }}
+                        >
                             {rewardName}
-                        </span>
+                        </motion.span>
                     </div>
                 </motion.div>
 
