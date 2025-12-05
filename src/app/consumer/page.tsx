@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import MapBackground from '@/components/consumer/MapBackground';
 import MissionOverlay from '@/components/consumer/MissionOverlay';
@@ -12,10 +13,21 @@ import LanguageToggle from '@/components/ui/LanguageToggle';
 import { toast } from 'sonner';
 
 export default function ConsumerPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showGame, setShowGame] = useState(false);
   const [showDailyReport, setShowDailyReport] = useState(true);
   const [activeMonster, setActiveMonster] = useState<any>(null);
   const [lang, setLang] = useState<'ko' | 'en'>('ko');
+
+  // Check for game auto-start
+  useEffect(() => {
+    const shouldStartGame = searchParams.get('game') === 'true';
+    if (shouldStartGame) {
+      setShowGame(true);
+      setShowDailyReport(false);
+    }
+  }, [searchParams]);
 
   // Mock Data for Monsters on Map
   const monsters = [

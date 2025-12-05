@@ -4,11 +4,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  ShoppingBag, 
-  Store, 
-  Wallet, 
-  ArrowRight, 
+import {
+  ShoppingBag,
+  Store,
+  Wallet,
+  ArrowRight,
   Zap,
   Shield,
   MapPin,
@@ -147,7 +147,7 @@ export default function LandingPage() {
         <div className="absolute top-0 left-1/4 w-48 sm:w-72 md:w-96 h-48 sm:h-72 md:h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-48 sm:w-72 md:w-96 h-48 sm:h-72 md:h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[450px] md:w-[600px] h-[300px] sm:h-[450px] md:h-[600px] bg-pink-500/5 rounded-full blur-3xl" />
-        
+
         {/* 3D Grid Effect */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:50px_50px] sm:bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,black_40%,transparent_100%)]" />
       </div>
@@ -155,7 +155,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 glass safe-area-top">
         <div className="container mx-auto flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4">
-          <motion.div 
+          <motion.div
             className="flex items-center gap-2 sm:gap-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -165,7 +165,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
                 <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <motion.div 
+              <motion.div
                 className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full border-2 border-background"
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
@@ -179,8 +179,8 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-1 sm:gap-2">
             <ThemeToggle />
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => router.push('/login')}
               className="hidden sm:flex text-xs sm:text-sm"
@@ -199,17 +199,57 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
+            {/* Real-time Event LED Button */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-6 sm:mb-8"
+            >
+              <Button
+                onClick={() => router.push('/consumer?game=true')}
+                className="relative overflow-hidden bg-black/80 hover:bg-black border-2 border-white/20 rounded-full px-8 py-6 shadow-[0_0_20px_rgba(0,0,0,0.5)] group transform hover:scale-105 transition-all duration-300"
+              >
+                {/* LED Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-green-500/20 to-yellow-500/20 animate-pulse" />
+
+                {/* Animated Text */}
+                <motion.span
+                  className="relative text-lg sm:text-xl font-black tracking-wider z-10"
+                  animate={{
+                    color: ['#FFD600', '#FF3D00', '#00C853', '#FFD600'],
+                    textShadow: [
+                      '0 0 10px rgba(255, 214, 0, 0.8)',
+                      '0 0 10px rgba(255, 61, 0, 0.8)',
+                      '0 0 10px rgba(0, 200, 83, 0.8)',
+                      '0 0 10px rgba(255, 214, 0, 0.8)'
+                    ]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                >
+                  실시간 이벤트
+                </motion.span>
+
+                {/* Shine Effect */}
+                <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/20 to-transparent rounded-t-full pointer-events-none" />
+              </Button>
+            </motion.div>
+
             <Badge className="mb-4 sm:mb-6 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-pink-500/10 text-primary border-purple-500/20 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm">
               <MapPin className="w-3 h-3 mr-1" />
               위치기반 AR 플랫폼
             </Badge>
-            
+
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
               <span className="bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">위치기반 AR</span>
               <br />
               <span className="text-foreground">디지털 재화 플랫폼</span>
             </h1>
-            
+
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
               증강현실 기술과 위치기반 서비스를 결합한
               <br className="hidden sm:block" />
@@ -252,34 +292,34 @@ export default function LandingPage() {
                   whileHover={{ scale: 1.02, y: -5 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Card 
+                  <Card
                     className={`glass-card cursor-pointer group overflow-hidden hover-glow ${button.shadowColor} relative touch-manipulation`}
                     onClick={() => router.push(button.href)}
                   >
                     <CardContent className="p-4 sm:p-6 relative">
                       {/* Background Gradient */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${button.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-                      
+
                       {/* 3D Floating Icon */}
-                      <motion.div 
+                      <motion.div
                         className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-xl sm:rounded-2xl bg-gradient-to-br ${button.color} flex items-center justify-center shadow-lg ${button.shadowColor}`}
-                        whileHover={{ 
-                          rotateY: 15, 
+                        whileHover={{
+                          rotateY: 15,
                           rotateX: -15,
-                          scale: 1.1 
+                          scale: 1.1
                         }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
                         <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                       </motion.div>
-                      
+
                       {/* Text */}
                       <div className="text-center mb-3 sm:mb-4">
                         <h3 className="text-lg sm:text-xl font-bold mb-1">{button.label}</h3>
                         <p className="text-[10px] sm:text-xs text-muted-foreground mb-1 sm:mb-2">{button.sublabel}</p>
                         <p className="text-xs sm:text-sm text-muted-foreground">{button.description}</p>
                       </div>
-                      
+
                       {/* Features */}
                       <div className="flex flex-wrap justify-center gap-1 mb-3 sm:mb-4">
                         {button.features.map((feature, i) => (
@@ -288,7 +328,7 @@ export default function LandingPage() {
                           </Badge>
                         ))}
                       </div>
-                      
+
                       {/* Arrow */}
                       <div className="flex items-center justify-center text-primary">
                         <span className="text-xs sm:text-sm font-medium mr-1">시작하기</span>
@@ -438,13 +478,13 @@ export default function LandingPage() {
               <CardContent className="p-6 sm:p-8 md:p-12 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-purple-500/10" />
                 <div className="relative text-center">
-                  <motion.div 
+                  <motion.div
                     className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30"
-                    animate={{ 
+                    animate={{
                       rotateY: [0, 360],
                     }}
-                    transition={{ 
-                      duration: 8, 
+                    transition={{
+                      duration: 8,
                       repeat: Infinity,
                       ease: "linear"
                     }}
@@ -459,7 +499,7 @@ export default function LandingPage() {
                     무료로 시작할 수 있습니다.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
-                    <Button 
+                    <Button
                       size="lg"
                       className="bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-600 hover:via-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/30 text-sm sm:text-base"
                       onClick={() => router.push('/merchant')}
@@ -467,7 +507,7 @@ export default function LandingPage() {
                       <Store className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                       사업자로 시작
                     </Button>
-                    <Button 
+                    <Button
                       size="lg"
                       variant="outline"
                       onClick={() => router.push('/consumer')}
