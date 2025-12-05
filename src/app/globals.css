@@ -1,56 +1,87 @@
 @import "tailwindcss";
 
+/* Hide Next.js Dev Overlay */
+nextjs-portal,
+#nextjs-dev-tools-overlay {
+  display: none !important;
+}
+
 @variant dark (&:where(.dark, .dark *));
 
 :root {
-  --color-background: oklch(from white calc(l * 0.98) c h);
-  --color-foreground: oklch(from black calc(l * 0.15) c h);
-  --color-card: oklch(from white l c h);
-  --color-card-foreground: oklch(from black calc(l * 0.15) c h);
-  --color-popover: oklch(from white l c h);
-  --color-popover-foreground: oklch(from black calc(l * 0.15) c h);
-  --color-primary: oklch(from #8b5cf6 l c h);
-  --color-primary-foreground: oklch(from white l c h);
-  --color-secondary: oklch(from #f3f4f6 l c h);
-  --color-secondary-foreground: oklch(from black calc(l * 0.15) c h);
-  --color-muted: oklch(from #f3f4f6 l c h);
-  --color-muted-foreground: oklch(from #6b7280 l c h);
-  --color-accent: oklch(from #f3f4f6 l c h);
-  --color-accent-foreground: oklch(from black calc(l * 0.15) c h);
-  --color-destructive: oklch(from #ef4444 l c h);
-  --color-destructive-foreground: oklch(from white l c h);
-  --color-border: oklch(from #e5e7eb l c h);
-  --color-input: oklch(from #e5e7eb l c h);
-  --color-ring: oklch(from #8b5cf6 l c h);
-  --radius: 0.5rem;
+  /* Warm & Playful Palette */
+  --color-background: oklch(from #f8f9fa l c h);
+  /* Slightly warmer background */
+  --color-foreground: oklch(from #1a1a1a l c h);
 
-  --color-chart-1: oklch(from #8b5cf6 l c h);
-  --color-chart-2: oklch(from #ec4899 l c h);
-  --color-chart-3: oklch(from #06b6d4 l c h);
-  --color-chart-4: oklch(from #f59e0b l c h);
-  --color-chart-5: oklch(from #10b981 l c h);
+  --color-card: oklch(from white l c h);
+  --color-card-foreground: oklch(from #1a1a1a l c h);
+
+  --color-popover: oklch(from white l c h);
+  --color-popover-foreground: oklch(from #1a1a1a l c h);
+
+  /* Vibrant Green (Main Action / Success) */
+  --color-primary: oklch(from #00C853 l c h);
+  --color-primary-foreground: oklch(from white l c h);
+
+  /* Vibrant Yellow (Highlight / Warning) */
+  --color-secondary: oklch(from #FFD600 l c h);
+  --color-secondary-foreground: oklch(from black l c h);
+
+  /* Vibrant Blue (Info / Accent) */
+  --color-accent: oklch(from #2962FF l c h);
+  --color-accent-foreground: oklch(from white l c h);
+
+  /* Vibrant Red (Destructive / Important) */
+  --color-destructive: oklch(from #FF3D00 l c h);
+  --color-destructive-foreground: oklch(from white l c h);
+
+  --color-muted: oklch(from #f1f5f9 l c h);
+  --color-muted-foreground: oklch(from #64748b l c h);
+
+  --color-border: oklch(from #e2e8f0 l c h);
+  --color-input: oklch(from #e2e8f0 l c h);
+  --color-ring: oklch(from #00C853 l c h);
+
+  --radius: 1.5rem;
+  /* More rounded */
+
+  --color-chart-1: oklch(from #00C853 l c h);
+  --color-chart-2: oklch(from #FFD600 l c h);
+  --color-chart-3: oklch(from #2962FF l c h);
+  --color-chart-4: oklch(from #FF3D00 l c h);
+  --color-chart-5: oklch(from #AA00FF l c h);
 }
 
 .dark {
-  --color-background: oklch(from black calc(l + 0.05) c h);
-  --color-foreground: oklch(from white calc(l * 0.95) c h);
-  --color-card: oklch(from black calc(l + 0.08) c h);
-  --color-card-foreground: oklch(from white calc(l * 0.95) c h);
-  --color-popover: oklch(from black calc(l + 0.08) c h);
-  --color-popover-foreground: oklch(from white calc(l * 0.95) c h);
-  --color-primary: oklch(from #a78bfa l c h);
-  --color-primary-foreground: oklch(from black calc(l * 0.15) c h);
-  --color-secondary: oklch(from #1f2937 l c h);
-  --color-secondary-foreground: oklch(from white calc(l * 0.95) c h);
-  --color-muted: oklch(from #1f2937 l c h);
-  --color-muted-foreground: oklch(from #9ca3af l c h);
-  --color-accent: oklch(from #1f2937 l c h);
-  --color-accent-foreground: oklch(from white calc(l * 0.95) c h);
-  --color-destructive: oklch(from #dc2626 l c h);
-  --color-destructive-foreground: oklch(from white calc(l * 0.95) c h);
-  --color-border: oklch(from #374151 l c h);
-  --color-input: oklch(from #374151 l c h);
-  --color-ring: oklch(from #a78bfa l c h);
+  --color-background: oklch(from #121212 l c h);
+  --color-foreground: oklch(from #ffffff l c h);
+
+  --color-card: oklch(from #1e1e1e l c h);
+  --color-card-foreground: oklch(from #ffffff l c h);
+
+  --color-popover: oklch(from #1e1e1e l c h);
+  --color-popover-foreground: oklch(from #ffffff l c h);
+
+  /* Keep vibrant colors even in dark mode */
+  --color-primary: oklch(from #00E676 l c h);
+  --color-primary-foreground: oklch(from black l c h);
+
+  --color-secondary: oklch(from #FFEA00 l c h);
+  --color-secondary-foreground: oklch(from black l c h);
+
+  --color-accent: oklch(from #448AFF l c h);
+  --color-accent-foreground: oklch(from white l c h);
+
+  --color-destructive: oklch(from #FF5252 l c h);
+  --color-destructive-foreground: oklch(from white l c h);
+
+  --color-muted: oklch(from #334155 l c h);
+  --color-muted-foreground: oklch(from #94a3b8 l c h);
+
+  --color-border: oklch(from #334155 l c h);
+  --color-input: oklch(from #334155 l c h);
+  --color-ring: oklch(from #00E676 l c h);
 }
 
 @theme inline {

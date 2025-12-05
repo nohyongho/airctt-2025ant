@@ -13,143 +13,232 @@ import {
 } from '@react-three/drei';
 import * as THREE from 'three';
 
-interface FloatingCouponProps {
+import RabbitReward from './RabbitReward';
+import { walletService } from '@/lib/wallet-service';
+
+interface FallingGemProps {
+    id: number;
     position: [number, number, number];
     color: string;
-    onAcquire: () => void;
-    label: string;
+    scale: number;
+    shape: 'dodecahedron' | 'octahedron' | 'icosahedron';
+    onInteraction: (id: number) => void;
 }
 
-function FloatingCoupon({ position, color, onAcquire, label }: FloatingCouponProps) {
-    const meshRef = useRef<THREE.Mesh>(null);
+const FallingGem = React.memo(function FallingGem({ id, position, color, scale: gemScale, shape, onInteraction }: FallingGemProps) {
+    const groupRef = useRef<THREE.Group>(null);
     const [hovered, setHovered] = useState(false);
-    const [acquired, setAcquired] = useState(false);
 
-    useFrame((state) => {
-        if (meshRef.current && !acquired) {
-            meshRef.current.rotation.x = Math.sin(state.clock.getElapsedTime() / 2) * 0.2;
-            meshRef.current.rotation.y += 0.01;
+    // Falling physics applied to the GROUP (so hit box moves with gem)
+    useFrame((state, delta) => {
+        if (groupRef.current) {
+            // Fall down
+            groupRef.current.position.y -= delta * 1.5; // Speed
+
+            // Rotate
+            groupRef.current.rotation.x += delta;
+            groupRef.current.rotation.y += delta * 0.5;
+
+            // Reset if out of view
+            if (groupRef.current.position.y < -4) {
+                groupRef.current.position.y = 4 + Math.random() * 2;
+                groupRef.current.position.x = (Math.random() - 0.5) * 3;
+            }
         }
     });
 
-    const handleClick = () => {
-        if (acquired) return;
-        setAcquired(true);
-        onAcquire();
-    };
-
-    if (acquired) return null;
+    const Geometry = shape === 'dodecahedron' ? THREE.DodecahedronGeometry :
+        shape === 'octahedron' ? THREE.OctahedronGeometry :
+            THREE.IcosahedronGeometry;
 
     return (
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5} position={position}>
-            <group>
-                <mesh
-                    ref={meshRef}
-                    onClick={handleClick}
-                    onPointerOver={() => setHovered(true)}
-                    onPointerOut={() => setHovered(false)}
-                    scale={hovered ? 1.2 : 1}
-                >
-                    <octahedronGeometry args={[0.8, 0]} />
-                    <MeshTransmissionMaterial
-                        backside
-                        samples={4}
-                        thickness={0.5}
-                        chromaticAberration={0.05}
-                        anisotropy={0.1}
-                        distortion={0.1}
-                        distortionScale={0.1}
-                        temporalDistortion={0.1}
-                        color={color}
-                        emissive={color}
-                        emissiveIntensity={hovered ? 0.5 : 0.1}
-                        toneMapped={true}
-                    />
-                </mesh>
-                <Text
-                    position={[0, -1.2, 0]}
-                    fontSize={0.3}
-                    color="white"
-                    anchorX="center"
-                    anchorY="middle"
-                    outlineWidth={0.02}
-                    outlineColor="#000000"
-                >
-                    {label}
-                </Text>
-                {hovered && (
-                    <Html position={[0, 1.2, 0]} center>
-                        <div className="px-2 py-1 bg-black/80 text-white text-xs rounded-full whitespace-nowrap border border-white/20 backdrop-blur-md pointer-events-none">
-                            터치하여 획득!
-                        </div>
-                    </Html>
-                )}
-            </group>
-        </Float>
+        <group ref={groupRef} position={position}>
+            {/* Invisible Hit Box (Larger) - Must be visible=true but transparent for raycast */}
+            <mesh onClick={() => onInteraction(id)}>
+                <sphereGeometry args={[0.8, 16, 16]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+
+            {/* Visible Gem */}
+            <mesh
+                onPointerOver={() => setHovered(true)}
+                onPointerOut={() => setHovered(false)}
+                scale={hovered ? gemScale * 1.2 : gemScale} // Use random scale
+            >
+                <primitive object={new Geometry(0.8, 0)} />
+                <MeshTransmissionMaterial
+                    backside
+                    samples={4}
+                    thickness={0.5}
+                    chromaticAberration={0.1}
+                    anisotropy={0.1}
+                    distortion={0.5}
+                    distortionScale={0.5}
+                    temporalDistortion={0.2}
+                    color={color}
+                    emissive={color}
+                    emissiveIntensity={hovered ? 0.8 : 0.4}
+                    toneMapped={true}
+                />
+            </mesh>
+        </group>
+    );
+});
+
+function Explosion({ position, color }: { position: [number, number, number], color: string }) {
+    return (
+        <group position={position}>
+            {/* Core Burst - Firework Style */}
+            <Sparkles
+                count={40}
+                scale={2.5}
+                size={8}
+                speed={2}
+                opacity={1}
+                color={color}
+                noise={0.5}
+            />
+            {/* Outer Sparkles - Wide Spread */}
+            <Sparkles
+                count={30}
+                scale={4}
+                size={4}
+                speed={1}
+                opacity={0.6}
+                color="#FFF"
+                noise={1}
+            />
+        </group>
     );
 }
 
 interface EventGameWindowProps {
     onCouponAcquired: (amount: number, name: string) => void;
+    lang: 'ko' | 'en';
 }
 
-export default function EventGameWindow({ onCouponAcquired }: EventGameWindowProps) {
-    // Initial coupons definition
-    const initialCoupons = useMemo(() => [
-        { id: 1, pos: [-1.5, 0.5, 0] as [number, number, number], color: '#ff0055', label: '10% 할인', value: 10 },
-        { id: 2, pos: [0, -0.5, 1] as [number, number, number], color: '#00ff88', label: '무료 배송', value: 3000 },
-        { id: 3, pos: [1.5, 0.8, -0.5] as [number, number, number], color: '#00ccff', label: '500P', value: 500 },
-    ], []);
+export default function EventGameWindow({ onCouponAcquired, lang }: EventGameWindowProps) {
+    // Generate random gems
+    const initialGems = useMemo(() => Array.from({ length: 8 }).map((_, i) => ({
+        id: i,
+        pos: [(Math.random() - 0.5) * 3, 4 + Math.random() * 5, (Math.random() - 0.5) * 2] as [number, number, number],
+        color: ['#FF3D00', '#00C853', '#2962FF', '#FFD600', '#AA00FF'][Math.floor(Math.random() * 5)],
+        scale: 0.2 + Math.random() * 0.3, // Random scale between 0.2 and 0.5
+        shape: ['dodecahedron', 'octahedron', 'icosahedron'][Math.floor(Math.random() * 3)] as any,
+    })), []);
 
-    const [activeCoupons, setActiveCoupons] = useState(initialCoupons);
+    const [gems, setGems] = useState(initialGems);
     const [score, setScore] = useState(0);
     const [acquiredCount, setAcquiredCount] = useState(0);
     const [isMaximized, setIsMaximized] = useState(false);
-    const [isSyncing, setIsSyncing] = useState(false);
+    const [showRabbit, setShowRabbit] = useState(false);
+    const [lastReward, setLastReward] = useState('');
+    const [explosions, setExplosions] = useState<{ id: number; position: [number, number, number]; color: string }[]>([]);
+    const [gameStarted, setGameStarted] = useState(false);
 
-    const handleAcquire = (id: number, value: number, label: string) => {
-        // Remove acquired coupon
-        setActiveCoupons(prev => prev.filter(c => c.id !== id));
+    // Audio Refs for managing playback
+    const audioRef = useRef<{ [key: string]: HTMLAudioElement }>({});
+    const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
-        // Update score
-        setScore(prev => prev + value);
-        setAcquiredCount(prev => prev + 1);
+    // Cleanup audio on unmount
+    useEffect(() => {
+        return () => {
+            stopAllSounds();
+        };
+    }, []);
 
-        // Notify parent
-        onCouponAcquired(value, label);
-
-        // Play sound
-        const audio = new Audio('/sounds/pop.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(() => { });
-
-        // Respawn logic (Continuous Play)
-        setTimeout(() => {
-            setActiveCoupons(prev => {
-                // Don't add if already exists (simple check)
-                if (prev.find(c => c.id === id)) return prev;
-
-                // Randomize position slightly
-                const newPos: [number, number, number] = [
-                    (Math.random() - 0.5) * 3,
-                    (Math.random() - 0.5) * 2,
-                    (Math.random() - 0.5) * 2
-                ];
-
-                const respawned = initialCoupons.find(c => c.id === id);
-                if (!respawned) return prev;
-
-                return [...prev, { ...respawned, pos: newPos }];
-            });
-        }, 2000); // Respawn after 2 seconds
-
-        // Simulate Google Sheets Sync
-        simulateSync();
+    const t = {
+        title: lang === 'ko' ? '보석 잡기' : 'GEM CATCH',
+        desc: lang === 'ko' ? '떨어지는 보석을 터치하세요!' : 'Touch the falling gems!',
+        score: lang === 'ko' ? '점수' : 'Score',
+        coupons: lang === 'ko' ? '쿠폰' : 'Coupons',
+        saving: lang === 'ko' ? '저장 중...' : 'Saving...',
+        luckyWin: lang === 'ko' ? '당첨!' : 'LUCKY WIN!',
+        discount: lang === 'ko' ? '10% 할인 쿠폰' : '10% Discount Coupon',
     };
 
-    const simulateSync = () => {
-        setIsSyncing(true);
-        setTimeout(() => setIsSyncing(false), 1500);
+    const stopAllSounds = () => {
+        // Stop all currently playing sounds in our ref
+        Object.values(audioRef.current).forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+        // Clear any pending sound triggers
+        timeoutsRef.current.forEach(clearTimeout);
+        timeoutsRef.current = [];
+    };
+
+    const playSound = (type: 'tok' | 'pung' | 'tada' | 'congrats') => {
+        // For 'tok', we allow overlap (don't stop others)
+        // For win sequence sounds, we might want to manage them
+
+        const audio = new Audio(`/sounds/${type}.mp3`);
+        audio.volume = 0.5;
+
+        // If it's a long sound like congrats, store it to stop later
+        if (type === 'congrats' || type === 'pung') {
+            audioRef.current[type] = audio;
+        }
+
+        audio.play().catch(() => { });
+    };
+
+    const handleInteraction = (id: number, position: [number, number, number], color: string) => {
+        if (!gameStarted) setGameStarted(true);
+
+        // Trigger Explosion
+        const explosionId = Date.now();
+        setExplosions(prev => [...prev, { id: explosionId, position, color }]);
+        setTimeout(() => {
+            setExplosions(prev => prev.filter(e => e.id !== explosionId));
+        }, 300); // 0.3s duration as requested
+
+        // 10% chance to win
+        // 10% chance to win
+        const isWin = Math.random() < 0.1;
+
+        if (isWin) {
+            // STOP previous win sounds if any
+            stopAllSounds();
+
+            // WIN SEQUENCE
+            playSound('pung');
+
+            const t1 = setTimeout(() => playSound('tada'), 500);
+            const t2 = setTimeout(() => playSound('congrats'), 1000);
+
+            timeoutsRef.current.push(t1, t2);
+
+            setLastReward(t.discount);
+            setShowRabbit(true);
+            setScore(prev => prev + 1000);
+            setAcquiredCount(prev => prev + 1);
+            setAcquiredCount(prev => prev + 1);
+            onCouponAcquired(1000, t.luckyWin);
+
+            // Save to Wallet
+            walletService.addCoupon({
+                title: t.discount,
+                description: 'Event Game Reward',
+                brand: 'AirCTT',
+                imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=200',
+            });
+        } else {
+            // NORMAL CLICK
+            playSound('tok');
+            setScore(prev => prev + 10);
+        }
+
+        // Respawn gem immediately at top
+        setGems(prev => prev.map(g => {
+            if (g.id === id) {
+                return {
+                    ...g,
+                    pos: [(Math.random() - 0.5) * 3, 5 + Math.random() * 2, (Math.random() - 0.5) * 2]
+                };
+            }
+            return g;
+        }));
     };
 
     const toggleMaximize = () => {
@@ -158,93 +247,97 @@ export default function EventGameWindow({ onCouponAcquired }: EventGameWindowPro
 
     return (
         <div
-            className={`relative bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 overflow-hidden shadow-2xl transition-all duration-500 ease-in-out ${isMaximized ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-full rounded-xl border border-white/10'
+            className={`relative bg-gradient-to-b from-blue-400 via-purple-400 to-pink-400 overflow-hidden shadow-2xl transition-all duration-500 ease-in-out ${isMaximized ? 'fixed inset-0 z-50 rounded-none' : 'w-full h-full rounded-3xl border-4 border-white'
                 }`}
             onDoubleClick={toggleMaximize}
         >
-            {/* Header / Controls */}
-            <div className="absolute top-4 left-4 z-10 flex items-center gap-4 pointer-events-none">
-                <div>
-                    <h3 className="text-white font-bold text-base sm:text-lg drop-shadow-md flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        AR Event Zone
-                    </h3>
-                    <p className="text-white/60 text-[10px] sm:text-xs">쿠폰을 터치하여 획득하세요!</p>
-                </div>
-
-                {/* Google Sheets Sync Indicator */}
-                {isSyncing && (
-                    <div className="flex items-center gap-2 px-2 py-0.5 sm:px-3 sm:py-1 bg-green-500/20 border border-green-500/30 rounded-full backdrop-blur-md">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-ping" />
-                        <span className="text-[8px] sm:text-[10px] text-green-200 font-mono">Saving...</span>
+            {/* Rabbit Reward Overlay - Scaled to 60% */}
+            {showRabbit && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+                    <div className="scale-[0.6] origin-center">
+                        <RabbitReward
+                            rewardName={lastReward}
+                            onComplete={() => setShowRabbit(false)}
+                            lang={lang}
+                        />
                     </div>
-                )}
+                </div>
+            )}
+
+            {/* Scoreboard - Moved to Top Left */}
+            <div className="absolute top-4 left-4 z-20 pointer-events-none origin-top-left scale-[0.6]">
+                <div className="bg-white/20 backdrop-blur-md border-2 border-white/40 rounded-2xl p-2 sm:p-3 flex gap-3 sm:gap-4 shadow-lg">
+                    <div className="text-center min-w-[50px]">
+                        <div className="text-[10px] sm:text-xs text-white font-bold uppercase tracking-wider drop-shadow-sm">Score</div>
+                        <div className="text-lg sm:text-2xl font-black text-white drop-shadow-md">{score.toLocaleString()}</div>
+                    </div>
+                    <div className="w-0.5 bg-white/40" />
+                    <div className="text-center min-w-[50px]">
+                        <div className="text-[10px] sm:text-xs text-white font-bold uppercase tracking-wider drop-shadow-sm">Coupons</div>
+                        <div className="text-lg sm:text-2xl font-black text-[#FFD600] drop-shadow-md">{acquiredCount}</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Header / Controls - Moved down slightly & Hides on Start */}
+            <div className={`absolute top-24 left-4 z-10 flex items-center gap-4 pointer-events-none transition-opacity duration-500 ${gameStarted ? 'opacity-0' : 'opacity-100'}`}>
+                <div className="scale-[0.6] origin-top-left">
+                    <h3 className="text-white font-black text-lg sm:text-xl drop-shadow-md flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-[#00C853] border-2 border-white animate-bounce" />
+                        {t.title}
+                    </h3>
+                    <p className="text-white font-bold text-xs sm:text-sm drop-shadow-sm">{t.desc}</p>
+                </div>
             </div>
 
             {/* Window Controls */}
             <div className="absolute top-4 right-4 z-10 flex gap-2">
                 <button
                     onClick={toggleMaximize}
-                    className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 rounded-lg backdrop-blur-md transition-colors border border-white/10 z-50 cursor-pointer"
+                    className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-md transition-colors border-2 border-white/40 z-50 cursor-pointer text-white"
                 >
                     {isMaximized ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                     ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><path d="M9 3v18" /><path d="m15 9 3 3-3 3" /><path d="M9 12h9" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><path d="M9 3v18" /><path d="m15 9 3 3-3 3" /><path d="M9 12h9" /></svg>
                     )}
                 </button>
             </div>
 
-            {/* Scoreboard */}
-            <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
-                <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-2 sm:p-3 flex gap-3 sm:gap-4">
-                    <div className="text-center min-w-[50px]">
-                        <div className="text-[8px] sm:text-[10px] text-white/60 uppercase tracking-wider">Score</div>
-                        <div className="text-base sm:text-xl font-bold text-white font-mono">{score.toLocaleString()}</div>
-                    </div>
-                    <div className="w-px bg-white/10" />
-                    <div className="text-center min-w-[50px]">
-                        <div className="text-[8px] sm:text-[10px] text-white/60 uppercase tracking-wider">Coupons</div>
-                        <div className="text-base sm:text-xl font-bold text-yellow-400 font-mono">{acquiredCount}</div>
-                    </div>
-                </div>
-            </div>
-
             <Canvas dpr={[1, 2]}>
                 <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
-                <ambientLight intensity={0.5} />
-                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-                <pointLight position={[-10, -10, -10]} intensity={0.5} />
+                <ambientLight intensity={0.8} />
+                <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1.5} castShadow />
+                <pointLight position={[-10, -10, -10]} intensity={0.8} color="#FFD600" />
 
-                <Environment preset="city" />
+                <Environment preset="park" />
 
                 <group>
-                    {activeCoupons.map(coupon => (
-                        <FloatingCoupon
-                            key={`${coupon.id}-${coupon.pos[0]}`} // Unique key for respawn
-                            position={coupon.pos}
-                            color={coupon.color}
-                            label={coupon.label}
-                            onAcquire={() => handleAcquire(coupon.id, coupon.value, coupon.label)}
+                    {gems.map(gem => (
+                        <FallingGem
+                            key={gem.id}
+                            id={gem.id}
+                            position={gem.pos}
+                            color={gem.color}
+                            scale={gem.scale}
+                            shape={gem.shape}
+                            onInteraction={(id) => handleInteraction(id, gem.pos, gem.color)}
                         />
                     ))}
                 </group>
 
+                {/* Explosions */}
+                {explosions.map(exp => (
+                    <Explosion key={exp.id} position={exp.position} color={exp.color} />
+                ))}
+
                 <Sparkles
-                    count={50}
+                    count={30}
                     scale={5}
                     size={4}
                     speed={0.4}
                     opacity={0.5}
                     color="#ffffff"
-                />
-                <Sparkles
-                    count={30}
-                    scale={8}
-                    size={6}
-                    speed={0.2}
-                    opacity={0.3}
-                    color="#ff00ff"
                 />
             </Canvas>
         </div>

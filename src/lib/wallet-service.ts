@@ -65,7 +65,7 @@ const defaultPointHistory: PointHistory[] = [
 export const walletService = {
   getCoupons: async (): Promise<Coupon[]> => {
     if (typeof window === 'undefined') return defaultCoupons;
-    
+
     const stored = localStorage.getItem(COUPONS_KEY);
     if (stored) {
       try {
@@ -74,14 +74,14 @@ export const walletService = {
         return defaultCoupons;
       }
     }
-    
+
     localStorage.setItem(COUPONS_KEY, JSON.stringify(defaultCoupons));
     return defaultCoupons;
   },
 
   getPointBalance: async (): Promise<number> => {
     if (typeof window === 'undefined') return 5000;
-    
+
     const stored = localStorage.getItem(POINTS_KEY);
     if (stored) {
       try {
@@ -90,14 +90,14 @@ export const walletService = {
         return 5000;
       }
     }
-    
+
     localStorage.setItem(POINTS_KEY, '5000');
     return 5000;
   },
 
   getPointHistory: async (): Promise<PointHistory[]> => {
     if (typeof window === 'undefined') return defaultPointHistory;
-    
+
     const stored = localStorage.getItem(POINT_HISTORY_KEY);
     if (stored) {
       try {
@@ -106,7 +106,7 @@ export const walletService = {
         return defaultPointHistory;
       }
     }
-    
+
     localStorage.setItem(POINT_HISTORY_KEY, JSON.stringify(defaultPointHistory));
     return defaultPointHistory;
   },
@@ -114,19 +114,31 @@ export const walletService = {
   useCoupon: async (couponId: string): Promise<boolean> => {
     const coupons = await walletService.getCoupons();
     const index = coupons.findIndex(c => c.id === couponId);
-    
+
     if (index === -1) return false;
-    
+
     coupons[index].status = 'used';
     localStorage.setItem(COUPONS_KEY, JSON.stringify(coupons));
     return true;
+  },
+
+  addCoupon: async (coupon: Omit<Coupon, 'id' | 'status' | 'expiresAt'>): Promise<void> => {
+    const coupons = await walletService.getCoupons();
+    const newCoupon: Coupon = {
+      ...coupon,
+      id: 'coupon_' + Date.now(),
+      status: 'available',
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days validity
+    };
+    coupons.unshift(newCoupon);
+    localStorage.setItem(COUPONS_KEY, JSON.stringify(coupons));
   },
 
   addPoints: async (amount: number, description: string): Promise<void> => {
     const balance = await walletService.getPointBalance();
     const newBalance = balance + amount;
     localStorage.setItem(POINTS_KEY, newBalance.toString());
-    
+
     const history = await walletService.getPointHistory();
     const newEntry: PointHistory = {
       id: 'ph_' + Date.now(),
@@ -143,10 +155,10 @@ export const walletService = {
   usePoints: async (amount: number, description: string): Promise<boolean> => {
     const balance = await walletService.getPointBalance();
     if (balance < amount) return false;
-    
+
     const newBalance = balance - amount;
     localStorage.setItem(POINTS_KEY, newBalance.toString());
-    
+
     const history = await walletService.getPointHistory();
     const newEntry: PointHistory = {
       id: 'ph_' + Date.now(),
