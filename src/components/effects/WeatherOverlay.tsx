@@ -22,8 +22,8 @@ export const WeatherOverlay = React.memo(function WeatherOverlay({ type, intensi
 });
 
 function SnowEffect({ intensity }: { intensity: number }) {
-    // Increased count for "Cluster" effect (Kakao style)
-    const count = 300 * intensity;
+    // User requested "200% more" -> Increased base count significantly (300 -> 800)
+    const count = 800 * intensity;
     const mesh = useRef<THREE.InstancedMesh>(null);
 
     const particles = useMemo(() => {
@@ -31,11 +31,10 @@ function SnowEffect({ intensity }: { intensity: number }) {
         for (let i = 0; i < count; i++) {
             const t = Math.random() * 100;
             const factor = 20 + Math.random() * 100;
-            const speed = 0.01 + Math.random() / 40; // Slightly faster variance
+            const speed = 0.01 + Math.random() / 40;
             const xFactor = -50 + Math.random() * 100;
             const yFactor = -50 + Math.random() * 100;
             const zFactor = -50 + Math.random() * 100;
-            // Mixed sizes: Some small (dust), some large (flakes)
             const size = Math.random() > 0.8 ? 1.2 : 0.6 + Math.random() * 0.5;
             temp.push({ t, factor, speed, xFactor, yFactor, zFactor, size, mx: 0, my: 0 });
         }
@@ -47,22 +46,23 @@ function SnowEffect({ intensity }: { intensity: number }) {
     useFrame((state, delta) => {
         if (!mesh.current) return;
         particles.forEach((particle, i) => {
-            let { t, factor, speed, xFactor, yFactor, zFactor } = particle;
-            t = particle.t += speed / 2;
-            const a = Math.cos(t) + Math.sin(t * 1) / 10;
-            const b = Math.sin(t) + Math.cos(t * 2) / 10;
+            let { speed, xFactor, yFactor, zFactor, t } = particle;
 
-            // Downward movement
-            particle.my -= speed * 8; // Faster fall
-            if (particle.my < -30) particle.my = 30; // Higher reset point for seamless loop
+            // NOTE: Removed "Wind/Sway" effect as requested by Army.
+            // "Save the fluttering for windy/stormy days!" - Army
+            // t = particle.t += speed / 2; 
+
+            // Straight Downward Movement
+            particle.my -= speed * 8;
+            if (particle.my < -30) particle.my = 30;
 
             dummy.position.set(
-                (particle.mx / 10) * a + xFactor + Math.cos((t / 10) * factor) + (Math.sin(t * 1) * factor) / 10,
-                particle.my + yFactor + (Math.sin((t / 10) * factor) * factor) / 10,
-                (particle.my / 10) * b + zFactor + Math.cos((t / 10) * factor) + (Math.sin(t * 3) * factor) / 10
+                xFactor, // No sway (Math.cos removed)
+                particle.my + yFactor,
+                zFactor  // No sway
             );
 
-            // Random rotation for realism
+            // Gentle rotation is okay
             dummy.rotation.set(
                 Math.sin(t),
                 Math.cos(t),
