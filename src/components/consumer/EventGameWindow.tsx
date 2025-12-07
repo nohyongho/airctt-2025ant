@@ -196,6 +196,7 @@ export default function EventGameWindow({ onCouponAcquired, onClose, lang }: Eve
     // New State for Anticipation Logic
     const [previewMode, setPreviewMode] = useState(false);
     const [previewTier, setPreviewTier] = useState(0);
+    const [canInteract, setCanInteract] = useState(false); // Ghost click prevention
 
     // Audio Refs for managing playback
     const audioRef = useRef<{ [key: string]: HTMLAudioElement }>({});
@@ -220,6 +221,8 @@ export default function EventGameWindow({ onCouponAcquired, onClose, lang }: Eve
                 if (next >= 100) {
                     clearInterval(interval);
                     setIsDownloading(false);
+                    // Enable interaction after a short delay to prevent 'ghost clicks' from map
+                    setTimeout(() => setCanInteract(true), 800);
                     return 100;
                 }
                 return next;
@@ -349,6 +352,7 @@ export default function EventGameWindow({ onCouponAcquired, onClose, lang }: Eve
     };
 
     const handleInteraction = (id: number, position: [number, number, number], color: string) => {
+        if (!canInteract) return; // Prevent interaction if not ready
         if (!gameStarted) setGameStarted(true);
 
         // Trigger Explosion
