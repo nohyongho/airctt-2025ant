@@ -18,7 +18,7 @@ function ConsumerPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showGame, setShowGame] = useState(false);
-  const [showDailyReport, setShowDailyReport] = useState(true);
+  const [showDailyReport, setShowDailyReport] = useState(false); // Disabled by default for better flow
   const [activeMonster, setActiveMonster] = useState<any>(null);
   const [lang, setLang] = useState<'ko' | 'en'>('ko');
 

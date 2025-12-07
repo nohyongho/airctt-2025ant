@@ -22,7 +22,8 @@ export const WeatherOverlay = React.memo(function WeatherOverlay({ type, intensi
 });
 
 function SnowEffect({ intensity }: { intensity: number }) {
-    const count = 100 * intensity;
+    // Increased count for "Cluster" effect (Kakao style)
+    const count = 300 * intensity;
     const mesh = useRef<THREE.InstancedMesh>(null);
 
     const particles = useMemo(() => {
@@ -30,11 +31,12 @@ function SnowEffect({ intensity }: { intensity: number }) {
         for (let i = 0; i < count; i++) {
             const t = Math.random() * 100;
             const factor = 20 + Math.random() * 100;
-            const speed = 0.01 + Math.random() / 50; // Slower falling snow
+            const speed = 0.01 + Math.random() / 40; // Slightly faster variance
             const xFactor = -50 + Math.random() * 100;
             const yFactor = -50 + Math.random() * 100;
             const zFactor = -50 + Math.random() * 100;
-            const size = 0.5 + Math.random() * 1.5; // Random size variation
+            // Mixed sizes: Some small (dust), some large (flakes)
+            const size = Math.random() > 0.8 ? 1.2 : 0.6 + Math.random() * 0.5;
             temp.push({ t, factor, speed, xFactor, yFactor, zFactor, size, mx: 0, my: 0 });
         }
         return temp;
@@ -51,8 +53,8 @@ function SnowEffect({ intensity }: { intensity: number }) {
             const b = Math.sin(t) + Math.cos(t * 2) / 10;
 
             // Downward movement
-            particle.my -= speed * 5;
-            if (particle.my < -20) particle.my = 20; // Reset height trigger
+            particle.my -= speed * 8; // Faster fall
+            if (particle.my < -30) particle.my = 30; // Higher reset point for seamless loop
 
             dummy.position.set(
                 (particle.mx / 10) * a + xFactor + Math.cos((t / 10) * factor) + (Math.sin(t * 1) * factor) / 10,
@@ -77,21 +79,15 @@ function SnowEffect({ intensity }: { intensity: number }) {
     return (
         <instancedMesh ref={mesh} args={[undefined, undefined, count]}>
             {/* 
-        User requested: "보석 기준으로 10분에 2~3크기"
-        Typical Gem is scale 0.2~0.5. 0.8 sphere.
-        Let's assume Gem visual size is approx 1 unit.
-        Snow should be 0.2 to 0.3 units.
-        Sphere geometry radius 0.15 => Diameter 0.3 fits well.
+        User requested: "White abundant snow like Kakao"
+        Sphere geometry radius 0.15 => Diameter 0.3 fits well with size scaling.
       */}
             <sphereGeometry args={[0.15, 8, 8]} />
-            {/* Soft white snow material */}
-            <meshStandardMaterial
+            {/* Pure white basic material for "Bright White" look (ignores lighting) */}
+            <meshBasicMaterial
                 color="#ffffff"
                 transparent
-                opacity={0.8}
-                emissive="#ffffff"
-                emissiveIntensity={0.2}
-                roughness={0.5}
+                opacity={0.9}
             />
         </instancedMesh>
     );
